@@ -27,6 +27,11 @@ angular.module('bootstrapLightbox').run(['$templateCache', function($templateCac
     "<div class=modal-body ng-swipe-left=Lightbox.nextImage() ng-swipe-right=Lightbox.prevImage()><div class=lightbox-nav><button class=close aria-hidden=true ng-click=$dismiss()>×</button><div class=btn-group ng-if=\"Lightbox.images.length > 1\"><a class=\"btn btn-xs btn-default\" ng-click=Lightbox.prevImage()>‹ Previous</a> <a ng-href={{Lightbox.imageUrl}} target=_blank class=\"btn btn-xs btn-default\" title=\"Open in new tab\">Open image in new tab</a> <a class=\"btn btn-xs btn-default\" ng-click=Lightbox.nextImage()>Next ›</a></div></div><div class=lightbox-image-container><div class=lightbox-image-caption><span>{{Lightbox.imageCaption}}</span></div><img ng-if=!Lightbox.isVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}}><div ng-if=Lightbox.isVideo(Lightbox.image) class=\"embed-responsive embed-responsive-16by9\"><video ng-if=!Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} controls autoplay></video><embed-video ng-if=Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} ng-href={{Lightbox.imageUrl}} iframe-id=lightbox-video class=embed-responsive-item><a ng-href={{Lightbox.imageUrl}}>Watch video</a></embed-video></div></div></div>"
   );
 
+
+  $templateCache.put('modalWindow.html',
+    "<div class=\"modal-dialog {{size ? 'modal-' + size : ''}}\">modalwin<div class=modal-content uib-modal-transclude></div></div>"
+  );
+
 }]);
 /**
  * @class     ImageLoader
@@ -84,6 +89,14 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.templateUrl = 'lightbox.html';
+
+  /**
+   * Window Template URL passed into `$uibModal.open()`.
+   * @type     {String}
+   * @name     windowTemplateUrl
+   * @memberOf bootstrapLightbox.Lightbox
+   */
+  this.windowTemplateUrl = 'modalWindow.html';
 
   /**
    * Whether images should be scaled to the maximum possible dimensions.
@@ -251,6 +264,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
     // set the configurable properties and methods, the defaults of which are
     // defined above
     Lightbox.templateUrl = this.templateUrl;
+    Lightbox.windowTemplateUrl = this.windowTemplateUrl;
     Lightbox.fullScreenMode = this.fullScreenMode;
     Lightbox.getImageUrl = this.getImageUrl;
     Lightbox.getImageCaption = this.getImageCaption;
@@ -330,6 +344,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       // store the modal instance so we can close it manually if we need to
       Lightbox.modalInstance = $uibModal.open(angular.extend({
         'templateUrl': Lightbox.templateUrl,
+        'windowTemplateUrl': Lightbox.windowTemplateUrl,
         'controller': ['$scope', function ($scope) {
           // $scope is the modal scope, a child of $rootScope
           $scope.Lightbox = Lightbox;
