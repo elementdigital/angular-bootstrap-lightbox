@@ -29,7 +29,7 @@ angular.module('bootstrapLightbox').run(['$templateCache', function($templateCac
 
 
   $templateCache.put('modalWindow.html',
-    "<div class=\"modal-dialog {{size ? 'modal-' + size : ''}}\">modalwin<div class=modal-content uib-modal-transclude></div></div>"
+    "<div class=\"modal-dialog {{size ? 'modal-' + size : ''}}\"><div class=modal-content uib-modal-transclude></div></div>"
   );
 
 }]);
