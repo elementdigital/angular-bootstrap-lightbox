@@ -137,8 +137,7 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
           document.querySelector('.lightbox-modal .modal-dialog')
         ).css({
           'width': formatDimension(modalDimensions.width),
-          'margin-top': formatDimension(Lightbox.style.gutter),
-          //'margin-bottom': formatDimension(Lightbox.style.margin),
+          'margin-top': formatDimension(Lightbox.style.gutter)
         });
 
         // setting the padding on .modal-body
@@ -158,7 +157,7 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
           'border-width': formatDimension(Lightbox.style.border)
         });
 
-        // we ste the content head here because it factors into madal dimensions
+        // we set the content head height here because it factors into madal dimensions
         angular.element(
           document.querySelector('.modal-content .content-head')
         ).css({

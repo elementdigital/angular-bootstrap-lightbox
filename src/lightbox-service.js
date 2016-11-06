@@ -395,7 +395,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
           Lightbox.style.footHeight = styleParams.footHeight;
         }
       }
-      Lightbox.style.gutter = Lightbox.style.margin + Lightbox.style.border;
+      Lightbox.style.gutter = Lightbox.style.margin;
 
       return Lightbox.style;
     };
