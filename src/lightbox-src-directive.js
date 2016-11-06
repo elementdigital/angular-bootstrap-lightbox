@@ -136,7 +136,16 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
         angular.element(
           document.querySelector('.lightbox-modal .modal-dialog')
         ).css({
-          'width': formatDimension(modalDimensions.width)
+          'width': formatDimension(modalDimensions.width),
+          'margin-top': formatDimension(Lightbox.style.gutter),
+          //'margin-bottom': formatDimension(Lightbox.style.margin),
+        });
+
+        // setting the padding on .modal-body
+        angular.element(
+          document.querySelector('.lightbox-modal .modal-body')
+        ).css({
+          'padding': formatDimension(Lightbox.style.padding)
         });
 
         // .modal-content has no width specified; if we set the width on
@@ -145,7 +154,22 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
         angular.element(
           document.querySelector('.lightbox-modal .modal-content')
         ).css({
-          'height': formatDimension(modalDimensions.height)
+          'height': formatDimension(modalDimensions.height),
+          'border-width': formatDimension(Lightbox.style.border)
+        });
+
+        // we ste the content head here because it factors into madal dimensions
+        angular.element(
+          document.querySelector('.modal-content .content-head')
+        ).css({
+          'height': formatDimension(Lightbox.style.headHeight)
+        });
+
+        // we ste the content foot here because it factors into madal dimensions
+        angular.element(
+          document.querySelector('.modal-content .content-foot')
+        ).css({
+          'height': formatDimension(Lightbox.style.footHeight)
         });
       };
 
