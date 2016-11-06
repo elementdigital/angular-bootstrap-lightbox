@@ -29,6 +29,11 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
   this.fullScreenMode = false;
 
   /**
+    sets default styles
+  */
+  this.style = {padding:15, margin:30, border:1, headHeight: 34, footHeight: 0};
+
+  /**
    * @param    {*} image An element in the array of images.
    * @return   {String} The URL of the given image.
    * @type     {Function}
@@ -63,25 +68,29 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateImageDimensionLimits = function (dimensions) {
-    if (dimensions.windowWidth >= 768 && dimensions.windowHeight >= 640) {
-      this.style.gutter = (this.style.margin); 
-    } else if (dimensions.windowWidth >= 590 && dimensions.windowHeight >= 420) {
-      this.style.gutter = (this.style.margin/2); 
+    if (dimensions.windowWidth >= 768) {
+      return {
+        // 92px = 2 * (30px margin of .modal-dialog
+        //             + 1px border of .modal-content
+        //             + 15px padding of .modal-body)
+        // with the goal of 30px side margins; however, the actual side margins
+        // will be slightly less (at 22.5px) due to the vertical scrollbar
+        'maxWidth': dimensions.windowWidth - 92,
+        // 126px = 92px as above
+        //         + 34px outer height of .lightbox-nav
+        'maxHeight': dimensions.windowHeight - 126
+      };
     } else {
-      this.style.gutter = 6; 
+      return {
+        // 52px = 2 * (10px margin of .modal-dialog
+        //             + 1px border of .modal-content
+        //             + 15px padding of .modal-body)
+        'maxWidth': dimensions.windowWidth - 52,
+        // 86px = 52px as above
+        //        + 34px outer height of .lightbox-nav
+        'maxHeight': dimensions.windowHeight - 86
+      };
     }
-
-    return {
-      // 92px = 2 * (30px margin of .modal-dialog
-      //             + 1px border of .modal-content
-      //             + 15px padding of .modal-body)
-      // with the goal of 30px side margins; however, the actual side margins
-      // will be slightly less (at 22.5px) due to the vertical scrollbar
-      'maxWidth': dimensions.windowWidth - (this.style.gutter*2 + this.style.padding*2 + this.style.border*2),
-      // 126px = 92px as above
-      //         + 34px outer height of .lightbox-nav
-      'maxHeight': dimensions.windowHeight - ((this.style.gutter*2 + this.style.padding*2 + this.style.border*2) + (this.style.headHeight + this.style.footHeight))
-    };
   };
 
   /**
@@ -99,25 +108,25 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
     // 400px = arbitrary min width
     // 32px = 2 * (1px border of .modal-content
     //             + 15px padding of .modal-body)
-    var width = Math.max(100, dimensions.imageDisplayWidth + (this.style.border+this.style.padding)*2);
+    var width = Math.max(400, dimensions.imageDisplayWidth + 32);
 
     // 200px = arbitrary min height
     // 66px = 32px as above
     //        + 34px outer height of .lightbox-nav
-    var height = Math.max(100, dimensions.imageDisplayHeight + ((this.style.border+this.style.padding)*2) + (this.style.headHeight + this.style.footHeight));
+    var height = Math.max(200, dimensions.imageDisplayHeight + 66);
 
     // first case:  the modal width cannot be larger than the window width
     //              20px = arbitrary value larger than the vertical scrollbar
     //                     width in order to avoid having a horizontal scrollbar
     // second case: Bootstrap modals are not centered below 768px
-    /*if (width >= dimensions.windowWidth - this.style.margin || dimensions.windowWidth < 768) {
+    if (width >= dimensions.windowWidth - 20 || dimensions.windowWidth < 768) {
       width = 'auto';
     }
 
     // the modal height cannot be larger than the window height
-    if (height >= dimensions.windowHeight - this.style.margin) {
+    if (height >= dimensions.windowHeight) {
       height = 'auto';
-    }*/
+    }
 
     return {
       'width': width,
@@ -256,10 +265,9 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @name     openModal
      * @memberOf bootstrapLightbox.Lightbox
      */
-    Lightbox.openModal = function (newImages, newIndex, styleParams, modalParams) {
+    Lightbox.openModal = function (newImages, newIndex, modalParams) {
       Lightbox.images = newImages;
       Lightbox.setImage(newIndex);
-      Lightbox.setStyle(styleParams);
 
       // store the modal instance so we can close it manually if we need to
       Lightbox.modalInstance = $uibModal.open(angular.extend({
@@ -283,7 +291,6 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
         Lightbox.image = {};
         Lightbox.imageUrl = null;
         Lightbox.imageCaption = null;
-        Lightbox.style = {};
 
         Lightbox.keyboardNavEnabled = false;
 
@@ -363,41 +370,6 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       } else {
         success();
       }
-    };
-
-    /**
-     * This method sets and returns Lightbox.style.
-     * @param    {Object}
-     * @type     {Function}
-     * @return   {Object}
-     * @name     setStyle
-     * @memberOf bootstrapLightbox.Lightbox
-     */
-    Lightbox.setStyle = function (styleParams) {
-
-      //set default styles
-      Lightbox.style = {padding:15, margin:30, border:1, headHeight: 34, footHeight: 0};
-
-      if(styleParams){
-        if(styleParams.padding || styleParams.padding === 0){
-          Lightbox.style.padding = styleParams.padding;
-        }
-        if(styleParams.margin || styleParams.margin === 0){
-          Lightbox.style.margin = styleParams.margin;
-        }
-        if(styleParams.border || styleParams.border === 0){
-          Lightbox.style.border = styleParams.border;
-        }
-        if(styleParams.headHeight || styleParams.headHeight === 0){
-          Lightbox.style.headHeight = styleParams.headHeight;
-        }
-        if(styleParams.footHeight || styleParams.footHeight === 0){
-          Lightbox.style.footHeight = styleParams.footHeight;
-        }
-      }
-      Lightbox.style.gutter = Lightbox.style.margin;
-
-      return Lightbox.style;
     };
 
     /**
