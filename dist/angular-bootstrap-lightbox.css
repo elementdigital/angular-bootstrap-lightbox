@@ -1,7 +1,6 @@
 /*override some bootstrap*/
 .modal-dialog {
     margin: auto;
-    min-width: 320px;
 }
 @media (min-width: 768px)
 .modal-dialog {
