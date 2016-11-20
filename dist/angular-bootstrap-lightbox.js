@@ -24,7 +24,7 @@ angular.module('bootstrapLightbox').run(['$templateCache', function($templateCac
   'use strict';
 
   $templateCache.put('lightbox.html',
-    "<div class=modal-body ng-swipe-left=Lightbox.nextImage() ng-swipe-right=Lightbox.prevImage()><div ng-if=\"Lightbox.style.headHeight > 0\" class=content-head><div class=lightbox-nav><button class=close aria-hidden=true ng-click=$dismiss()>×</button><div class=btn-group ng-if=\"Lightbox.images.length > 1\"><a class=\"btn btn-xs btn-default\" ng-click=Lightbox.prevImage()>‹ Previous</a> <a ng-href={{Lightbox.imageUrl}} target=_blank class=\"btn btn-xs btn-default\" title=\"Open in new tab\">Open image in new tab</a> <a class=\"btn btn-xs btn-default\" ng-click=Lightbox.nextImage()>Next ›</a></div></div></div><div class=lightbox-image-container><div class=lightbox-image-caption><span>{{Lightbox.imageCaption}}</span></div><img ng-if=!Lightbox.isVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}}><div ng-if=Lightbox.isVideo(Lightbox.image) class=\"embed-responsive embed-responsive-16by9\"><video ng-if=!Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} controls autoplay></video><embed-video ng-if=Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} ng-href={{Lightbox.imageUrl}} iframe-id=lightbox-video class=embed-responsive-item><a ng-href={{Lightbox.imageUrl}}>Watch video</a></embed-video></div></div><div ng-if=\"Lightbox.style.footHeight > 0\" class=content-foot><p>content footer here</p></div></div>"
+    "<div class=modal-body ng-swipe-left=Lightbox.nextImage() ng-swipe-right=Lightbox.prevImage()><div class=lightbox-nav><button class=close aria-hidden=true ng-click=$dismiss()>×</button><div class=btn-group ng-if=\"Lightbox.images.length > 1\"><a class=\"btn btn-xs btn-default\" ng-click=Lightbox.prevImage()>‹ Previous</a> <a ng-href={{Lightbox.imageUrl}} target=_blank class=\"btn btn-xs btn-default\" title=\"Open in new tab\">Open image in new tab</a> <a class=\"btn btn-xs btn-default\" ng-click=Lightbox.nextImage()>Next ›</a></div></div><div class=lightbox-image-container><div class=lightbox-image-caption><span>{{Lightbox.imageCaption}}</span></div><img ng-if=!Lightbox.isVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}}><div ng-if=Lightbox.isVideo(Lightbox.image) class=\"embed-responsive embed-responsive-16by9\"><video ng-if=!Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} controls autoplay></video><embed-video ng-if=Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} ng-href={{Lightbox.imageUrl}} iframe-id=lightbox-video class=embed-responsive-item><a ng-href={{Lightbox.imageUrl}}>Watch video</a></embed-video></div></div></div>"
   );
 
 
@@ -107,11 +107,6 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
   this.fullScreenMode = false;
 
   /**
-    sets default styles
-  */
-  this.style = {padding:15, margin:30, border:1, headHeight: 34, footHeight: 0};
-
-  /**
    * @param    {*} image An element in the array of images.
    * @return   {String} The URL of the given image.
    * @type     {Function}
@@ -146,17 +141,29 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateImageDimensionLimits = function (dimensions) {
-    if (dimensions.windowWidth >= 768 && dimensions.windowHeight >= 640) {
-      this.style.gutter = (this.style.margin); 
-    } else if (dimensions.windowWidth >= 590 && dimensions.windowHeight >= 420) {
-      this.style.gutter = (this.style.margin/2); 
+    if (dimensions.windowWidth >= 768) {
+      return {
+        // 92px = 2 * (30px margin of .modal-dialog
+        //             + 1px border of .modal-content
+        //             + 15px padding of .modal-body)
+        // with the goal of 30px side margins; however, the actual side margins
+        // will be slightly less (at 22.5px) due to the vertical scrollbar
+        'maxWidth': dimensions.windowWidth - 92,
+        // 126px = 92px as above
+        //         + 34px outer height of .lightbox-nav
+        'maxHeight': dimensions.windowHeight - 126
+      };
     } else {
-      this.style.gutter = 6; 
+      return {
+        // 52px = 2 * (10px margin of .modal-dialog
+        //             + 1px border of .modal-content
+        //             + 15px padding of .modal-body)
+        'maxWidth': dimensions.windowWidth - 52,
+        // 86px = 52px as above
+        //        + 34px outer height of .lightbox-nav
+        'maxHeight': dimensions.windowHeight - 86
+      };
     }
-    return {
-      'maxWidth': dimensions.windowWidth - (this.style.gutter + this.style.padding + this.style.border)*2,
-      'maxHeight': dimensions.windowHeight - ((this.style.gutter + this.style.padding + this.style.border)*2 + (this.style.headHeight + this.style.footHeight))
-    };
   };
 
   /**
@@ -171,8 +178,29 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateModalDimensions = function (dimensions) {
-    var width = Math.max(0, dimensions.imageDisplayWidth + (this.style.border+this.style.padding)*2);
-    var height = Math.max(0, dimensions.imageDisplayHeight + (this.style.headHeight + this.style.footHeight) + ((this.style.border+this.style.padding)*2));
+    // 400px = arbitrary min width
+    // 32px = 2 * (1px border of .modal-content
+    //             + 15px padding of .modal-body)
+    var width = Math.max(400, dimensions.imageDisplayWidth + 32);
+
+    // 200px = arbitrary min height
+    // 66px = 32px as above
+    //        + 34px outer height of .lightbox-nav
+    var height = Math.max(200, dimensions.imageDisplayHeight + 66);
+
+    // first case:  the modal width cannot be larger than the window width
+    //              20px = arbitrary value larger than the vertical scrollbar
+    //                     width in order to avoid having a horizontal scrollbar
+    // second case: Bootstrap modals are not centered below 768px
+    if (width >= dimensions.windowWidth - 20 || dimensions.windowWidth < 768) {
+      width = 'auto';
+    }
+
+    // the modal height cannot be larger than the window height
+    if (height >= dimensions.windowHeight) {
+      height = 'auto';
+    }
+
     return {
       'width': width,
       'height': height
@@ -238,7 +266,6 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
     Lightbox.templateUrl = this.templateUrl;
     Lightbox.windowTemplateUrl = this.windowTemplateUrl;
     Lightbox.fullScreenMode = this.fullScreenMode;
-    Lightbox.style = this.style;
     Lightbox.getImageUrl = this.getImageUrl;
     Lightbox.getImageCaption = this.getImageCaption;
     Lightbox.calculateImageDimensionLimits = this.calculateImageDimensionLimits;
@@ -318,7 +345,6 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       Lightbox.modalInstance = $uibModal.open(angular.extend({
         'templateUrl': Lightbox.templateUrl,
         'windowTemplateUrl': Lightbox.windowTemplateUrl,
-        'animation': true,
         'controller': ['$scope', function ($scope) {
           // $scope is the modal scope, a child of $rootScope
           $scope.Lightbox = Lightbox;
@@ -647,15 +673,7 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
         angular.element(
           document.querySelector('.lightbox-modal .modal-dialog')
         ).css({
-          'width': formatDimension(modalDimensions.width),
-          'margin-top': formatDimension(Lightbox.style.gutter)
-        });
-
-        // setting the padding on .modal-body
-        angular.element(
-          document.querySelector('.lightbox-modal .modal-body')
-        ).css({
-          'padding': formatDimension(Lightbox.style.padding)
+          'width': formatDimension(modalDimensions.width)
         });
 
         // .modal-content has no width specified; if we set the width on
@@ -664,22 +682,7 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
         angular.element(
           document.querySelector('.lightbox-modal .modal-content')
         ).css({
-          'height': formatDimension(modalDimensions.height),
-          'border-width': formatDimension(Lightbox.style.border)
-        });
-
-        // we set the content head height here because it factors into madal dimensions
-        angular.element(
-          document.querySelector('.modal-content .content-head')
-        ).css({
-          'height': formatDimension(Lightbox.style.headHeight)
-        });
-
-        // we ste the content foot here because it factors into madal dimensions
-        angular.element(
-          document.querySelector('.modal-content .content-foot')
-        ).css({
-          'height': formatDimension(Lightbox.style.footHeight)
+          'height': formatDimension(modalDimensions.height)
         });
       };
 
