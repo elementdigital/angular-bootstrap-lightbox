@@ -73,7 +73,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
     } else if (dimensions.windowWidth >= 590 && dimensions.windowHeight >= 420) {
       this.style.gutter = (this.style.margin/2); 
     } else {
-      this.style.gutter = 6; 
+      this.style.gutter = 12; 
     }
     return {
       'maxWidth': dimensions.windowWidth - (this.style.gutter + this.style.padding + this.style.border)*2,
@@ -93,8 +93,8 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateModalDimensions = function (dimensions) {
-    var width = Math.max(0, dimensions.imageDisplayWidth + (this.style.border+this.style.padding)*2);
-    var height = Math.max(0, dimensions.imageDisplayHeight + (this.style.headHeight + this.style.footHeight) + ((this.style.border+this.style.padding)*2));
+    var width = Math.max(100, dimensions.imageDisplayWidth + (this.style.border+this.style.padding)*2);
+    var height = Math.max(100, dimensions.imageDisplayHeight + (this.style.headHeight + this.style.footHeight) + ((this.style.border+this.style.padding)*2));
     return {
       'width': width,
       'height': height
@@ -130,8 +130,8 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       !this.getImageUrl(image).match(/\.(mp4|ogg|webm)$/);
   };
 
-  this.$get = ['$document', '$injector', '$uibModal', '$timeout', 'ImageLoader',
-      function ($document, $injector, $uibModal, $timeout, ImageLoader) {
+  this.$get = ['$document', '$injector', '$uibModal', '$timeout', 'ImageLoader', '$animate',
+      function ($document, $injector, $uibModal, $timeout, ImageLoader, $animate) {
     // optional dependency
     var cfpLoadingBar = $injector.has('cfpLoadingBar') ?
       $injector.get('cfpLoadingBar'): null;
@@ -240,7 +240,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       Lightbox.modalInstance = $uibModal.open(angular.extend({
         'templateUrl': Lightbox.templateUrl,
         'windowTemplateUrl': Lightbox.windowTemplateUrl,
-        'animation': true,
+        'animation': false,
         'controller': ['$scope', function ($scope) {
           // $scope is the modal scope, a child of $rootScope
           $scope.Lightbox = Lightbox;
@@ -298,8 +298,9 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       }
 
       // update the loading flag and start the loading bar
-      Lightbox.loading = true;
+      Lightbox.isClickDisabled = true;
       if (cfpLoadingBar) {
+        Lightbox.loading = true;
         cfpLoadingBar.start();
       }
 
@@ -312,14 +313,20 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
         Lightbox.index = properties.index || newIndex;
         Lightbox.image = properties.image || image;
         Lightbox.imageUrl = properties.imageUrl || imageUrl;
-        Lightbox.imageCaption = properties.imageCaption ||
-          Lightbox.getImageCaption(image);
-
-        // restore the loading flag and complete the loading bar
-        Lightbox.loading = false;
-        if (cfpLoadingBar) {
-          cfpLoadingBar.complete();
-        }
+        Lightbox.imageCaption = properties.imageCaption || Lightbox.getImageCaption(image);
+        
+        var el = angular.element(document.querySelector('.lightbox-image-container'));
+        var im = angular.element(document.querySelector('.lightbox-image-container .image'));
+        $animate.addClass(el,'scale').then(function(){
+            // restore the loading flag and complete the loading bar
+            Lightbox.isClickDisabled = false;
+            im.addClass('fade');
+            if (cfpLoadingBar) {
+              Lightbox.loading = false;
+              cfpLoadingBar.complete();
+            }
+          }
+        );
       };
 
       if (!Lightbox.isVideo(image)) {
@@ -357,8 +364,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @memberOf bootstrapLightbox.Lightbox
      */
     Lightbox.prevImage = function () {
-      Lightbox.setImage((Lightbox.index - 1 + Lightbox.images.length) %
-        Lightbox.images.length);
+      Lightbox.setImage((Lightbox.index - 1 + Lightbox.images.length) % Lightbox.images.length);
     };
 
     /**

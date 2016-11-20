@@ -24,7 +24,12 @@ angular.module('bootstrapLightbox').run(['$templateCache', function($templateCac
   'use strict';
 
   $templateCache.put('lightbox.html',
-    "<div class=modal-body ng-swipe-left=Lightbox.nextImage() ng-swipe-right=Lightbox.prevImage()><div ng-if=\"Lightbox.style.headHeight > 0\" class=content-head><div class=lightbox-nav><button class=close aria-hidden=true ng-click=$dismiss()>×</button><div class=btn-group ng-if=\"Lightbox.images.length > 1\"><a class=\"btn btn-xs btn-default\" ng-click=Lightbox.prevImage()>‹ Previous</a> <a ng-href={{Lightbox.imageUrl}} target=_blank class=\"btn btn-xs btn-default\" title=\"Open in new tab\">Open image in new tab</a> <a class=\"btn btn-xs btn-default\" ng-click=Lightbox.nextImage()>Next ›</a></div></div></div><div class=lightbox-image-container><div class=lightbox-image-caption><span>{{Lightbox.imageCaption}}</span></div><img ng-if=!Lightbox.isVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}}><div ng-if=Lightbox.isVideo(Lightbox.image) class=\"embed-responsive embed-responsive-16by9\"><video ng-if=!Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} controls autoplay></video><embed-video ng-if=Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} ng-href={{Lightbox.imageUrl}} iframe-id=lightbox-video class=embed-responsive-item><a ng-href={{Lightbox.imageUrl}}>Watch video</a></embed-video></div></div><div ng-if=\"Lightbox.style.footHeight > 0\" class=content-foot><p>content footer here</p></div></div>"
+    "<div class=modal-body ng-class=\"{'loading':Lightbox.isClickDisabled}\" ng-swipe-left=Lightbox.nextImage() ng-swipe-right=Lightbox.prevImage()><div ng-if=\"Lightbox.style.headHeight > 0\" class=content-head><div class=lightbox-nav ng-class=\"{'out': Lightbox.isClickDisabled, 'in': !Lightbox.isClickDisabled }\"><button class=close aria-hidden=true ng-click=$dismiss()>×</button><div class=btn-group ng-if=\"Lightbox.images.length > 1\"><a class=\"btn btn-xs btn-default\" ng-click=\"Lightbox.isClickDisabled || Lightbox.prevImage()\" ng-disabled=Lightbox.isClickDisabled>‹ Previous</a> <a ng-href={{Lightbox.imageUrl}} target=_blank class=\"btn btn-xs btn-default\" title=\"Open in new tab\" ng-disabled=Lightbox.isClickDisabled>Open image in new tab</a> <a class=\"btn btn-xs btn-default\" ng-click=\"Lightbox.isClickDisabled || Lightbox.nextImage()\" ng-disabled=Lightbox.isClickDisabled>Next ›</a></div></div></div><div class=\"lightbox-image-container scale\" ng-swipe-left=\"Lightbox.isClickDisabled || Lightbox.nextImage($event)\" ng-swipe-right=\"Lightbox.isClickDisabled || Lightbox.prevImage($event)\"><img ng-if=\"!Lightbox.isVideo(Lightbox.image) && Lightbox.imageUrl\" lightbox-src={{Lightbox.imageUrl}} class=\"image fade\"><div ng-if=Lightbox.isVideo(Lightbox.image) class=\"embed-responsive embed-responsive-16by9\"><video ng-if=!Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} controls autoplay></video><embed-video ng-if=Lightbox.isSharedVideo(Lightbox.image) lightbox-src={{Lightbox.imageUrl}} ng-href={{Lightbox.imageUrl}} iframe-id=lightbox-video class=embed-responsive-item><a ng-href={{Lightbox.imageUrl}}>Watch video</a></embed-video></div></div><div ng-if=\"Lightbox.style.footHeight > 0\" class=content-foot><p class=\"caption loading\" ng-class=\"{'in':!Lightbox.isClickDisabled}\">{{Lightbox.imageCaption}}</p></div></div>"
+  );
+
+
+  $templateCache.put('lightbox2.html',
+    "<div class=modal-body><div ng-if=\"Lightbox.style.headHeight>0 && Lightbox.imageUrl\" class=\"head lightbox-image-title clearfix\"><span class=title>{{Lightbox.image.title}}</span> <a class=\"btn prev\" ng-class=\"{'loading':Lightbox.isClickDisabled}\" ng-if=\"(Lightbox.allIndex-1) > -1 && Lightbox.isVideo(Lightbox.image)\" ng-click=\"Lightbox.isClickDisabled || Lightbox.prevImage($event)\" ng-disabled=Lightbox.isClickDisabled><span class=\"glyphicon glyphicon-arrow-left\"></span></a> <a class=\"btn next\" ng-class=\"{'loading':Lightbox.isClickDisabled}\" ng-if=\"Lightbox.imagesTotal > (Lightbox.allIndex+1) && Lightbox.isVideo(Lightbox.image)\" ng-click=\"Lightbox.isClickDisabled || Lightbox.nextImage($event)\" ng-disabled=Lightbox.isClickDisabled><span class=\"glyphicon glyphicon-arrow-right\"></span></a> <button class=close aria-hidden=true ng-click=Lightbox.closeModal()>×</button></div><div class=lightbox-image-container ng-swipe-left=\"Lightbox.isClickDisabled || Lightbox.nextImage($event)\" ng-swipe-right=\"Lightbox.isClickDisabled || Lightbox.prevImage($event)\" ng-class=\"{'loading':Lightbox.isClickDisabled}\"><img ng-if=\"!Lightbox.isVideo(Lightbox.image) && Lightbox.imageUrl\" lightbox-src={{Lightbox.imageUrl}} class=\"image fade in\"><div ng-if=Lightbox.isVideo(Lightbox.image) class=\"image fade in\"><div class=videoWrapper><iframe width=560 height=315 lightbox-src=\"{{Lightbox.imageUrl}}?controls=3&autohide=3&showinfo=0\" frameborder=0 allowfullscreen></iframe></div></div><a class=\"btn prev\" ng-class=\"{'loading':Lightbox.isClickDisabled}\" ng-if=\"(Lightbox.allIndex-1) > -1 && !Lightbox.isVideo(Lightbox.image)\" ng-click=\"Lightbox.isClickDisabled || Lightbox.prevImage($event)\" ng-disabled=Lightbox.isClickDisabled><span class=\"glyphicon glyphicon-arrow-left\"></span></a> <a class=\"btn next\" ng-class=\"{'loading':Lightbox.isClickDisabled}\" ng-if=\"Lightbox.imagesTotal > (Lightbox.allIndex+1) && !Lightbox.isVideo(Lightbox.image)\" ng-click=\"Lightbox.isClickDisabled || Lightbox.nextImage($event)\" ng-disabled=Lightbox.isClickDisabled><span class=\"glyphicon glyphicon-arrow-right\"></span></a></div><div ng-if=\"Lightbox.style.footHeight>0 && Lightbox.imageUrl && !Lightbox.isVideo(Lightbox.image)\" class=\"foot lightbox-image-caption clearfix\"><span class=caption>{{Lightbox.image.caption}}: Image: {{Lightbox.allIndex+1}} of {{Lightbox.imagesTotal}} on page: {{Lightbox.currentPage}} of {{Lightbox.pagesTotal | ceil}}</span> <a class=info aria-hidden=true ng-click=$dismiss()><span class=\"glyphicon glyphicon-info-sign\"></span></a></div></div>"
   );
 
 
@@ -57,9 +62,11 @@ angular.module('bootstrapLightbox').service('ImageLoader', ['$q',
     // when the image has loaded
     image.onload = function () {
       // check image properties for possible errors
-      if ((typeof this.complete === 'boolean' && this.complete === false) ||
-          (typeof this.naturalWidth === 'number' && this.naturalWidth === 0)) {
+      if ((typeof this.complete === 'boolean' && this.complete === false) || (typeof this.naturalWidth === 'number' && this.naturalWidth === 0)) {
         deferred.reject();
+      }else{
+        var el = angular.element(document.querySelector('.lightbox-image-container .image'));
+        el.addClass('in');
       }
 
       deferred.resolve(image);
@@ -151,7 +158,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
     } else if (dimensions.windowWidth >= 590 && dimensions.windowHeight >= 420) {
       this.style.gutter = (this.style.margin/2); 
     } else {
-      this.style.gutter = 6; 
+      this.style.gutter = 12; 
     }
     return {
       'maxWidth': dimensions.windowWidth - (this.style.gutter + this.style.padding + this.style.border)*2,
@@ -171,8 +178,8 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateModalDimensions = function (dimensions) {
-    var width = Math.max(0, dimensions.imageDisplayWidth + (this.style.border+this.style.padding)*2);
-    var height = Math.max(0, dimensions.imageDisplayHeight + (this.style.headHeight + this.style.footHeight) + ((this.style.border+this.style.padding)*2));
+    var width = Math.max(100, dimensions.imageDisplayWidth + (this.style.border+this.style.padding)*2);
+    var height = Math.max(100, dimensions.imageDisplayHeight + (this.style.headHeight + this.style.footHeight) + ((this.style.border+this.style.padding)*2));
     return {
       'width': width,
       'height': height
@@ -208,8 +215,8 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       !this.getImageUrl(image).match(/\.(mp4|ogg|webm)$/);
   };
 
-  this.$get = ['$document', '$injector', '$uibModal', '$timeout', 'ImageLoader',
-      function ($document, $injector, $uibModal, $timeout, ImageLoader) {
+  this.$get = ['$document', '$injector', '$uibModal', '$timeout', 'ImageLoader', '$animate',
+      function ($document, $injector, $uibModal, $timeout, ImageLoader, $animate) {
     // optional dependency
     var cfpLoadingBar = $injector.has('cfpLoadingBar') ?
       $injector.get('cfpLoadingBar'): null;
@@ -318,7 +325,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       Lightbox.modalInstance = $uibModal.open(angular.extend({
         'templateUrl': Lightbox.templateUrl,
         'windowTemplateUrl': Lightbox.windowTemplateUrl,
-        'animation': true,
+        'animation': false,
         'controller': ['$scope', function ($scope) {
           // $scope is the modal scope, a child of $rootScope
           $scope.Lightbox = Lightbox;
@@ -376,8 +383,9 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       }
 
       // update the loading flag and start the loading bar
-      Lightbox.loading = true;
+      Lightbox.isClickDisabled = true;
       if (cfpLoadingBar) {
+        Lightbox.loading = true;
         cfpLoadingBar.start();
       }
 
@@ -390,14 +398,20 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
         Lightbox.index = properties.index || newIndex;
         Lightbox.image = properties.image || image;
         Lightbox.imageUrl = properties.imageUrl || imageUrl;
-        Lightbox.imageCaption = properties.imageCaption ||
-          Lightbox.getImageCaption(image);
-
-        // restore the loading flag and complete the loading bar
-        Lightbox.loading = false;
-        if (cfpLoadingBar) {
-          cfpLoadingBar.complete();
-        }
+        Lightbox.imageCaption = properties.imageCaption || Lightbox.getImageCaption(image);
+        
+        var el = angular.element(document.querySelector('.lightbox-image-container'));
+        var im = angular.element(document.querySelector('.lightbox-image-container .image'));
+        $animate.addClass(el,'scale').then(function(){
+            // restore the loading flag and complete the loading bar
+            Lightbox.isClickDisabled = false;
+            im.addClass('fade');
+            if (cfpLoadingBar) {
+              Lightbox.loading = false;
+              cfpLoadingBar.complete();
+            }
+          }
+        );
       };
 
       if (!Lightbox.isVideo(image)) {
@@ -435,8 +449,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @memberOf bootstrapLightbox.Lightbox
      */
     Lightbox.prevImage = function () {
-      Lightbox.setImage((Lightbox.index - 1 + Lightbox.images.length) %
-        Lightbox.images.length);
+      Lightbox.setImage((Lightbox.index - 1 + Lightbox.images.length) % Lightbox.images.length);
     };
 
     /**
@@ -628,27 +641,11 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
           Lightbox.fullScreenMode
         );
 
-        // calculate the dimensions of the modal container
-        var modalDimensions = Lightbox.calculateModalDimensions({
-          'windowWidth': windowWidth,
-          'windowHeight': windowHeight,
-          'imageDisplayWidth': imageDisplayDimensions.width,
-          'imageDisplayHeight': imageDisplayDimensions.height
-        });
-
-        // resize the image
-        element.css({
-          'width': imageDisplayDimensions.width + 'px',
-          'height': imageDisplayDimensions.height + 'px'
-        });
-
-        // setting the height on .modal-dialog does not expand the div with the
-        // background, which is .modal-content
         angular.element(
-          document.querySelector('.lightbox-modal .modal-dialog')
+          document.querySelector('.lightbox-modal .modal-content')
         ).css({
-          'width': formatDimension(modalDimensions.width),
-          'margin-top': formatDimension(Lightbox.style.gutter)
+          //'height': formatDimension(modalDimensions.height),
+          'border-width': formatDimension(Lightbox.style.border)
         });
 
         // setting the padding on .modal-body
@@ -656,16 +653,6 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
           document.querySelector('.lightbox-modal .modal-body')
         ).css({
           'padding': formatDimension(Lightbox.style.padding)
-        });
-
-        // .modal-content has no width specified; if we set the width on
-        // .modal-content and not on .modal-dialog, .modal-dialog retains its
-        // default width of 600px and that places .modal-content off center
-        angular.element(
-          document.querySelector('.lightbox-modal .modal-content')
-        ).css({
-          'height': formatDimension(modalDimensions.height),
-          'border-width': formatDimension(Lightbox.style.border)
         });
 
         // we set the content head height here because it factors into madal dimensions
@@ -681,6 +668,14 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
         ).css({
           'height': formatDimension(Lightbox.style.footHeight)
         });
+
+        angular.element(
+          document.querySelector('.lightbox-modal .lightbox-image-container')
+        ).css({
+          'width': imageDisplayDimensions.width + 'px',
+          'height': imageDisplayDimensions.height + 'px'
+        });
+
       };
 
       // load the new image and/or resize the video whenever the attr changes

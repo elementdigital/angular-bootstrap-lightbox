@@ -1,38 +1,30 @@
-<div class="modal-body"
-    ng-swipe-left="Lightbox.nextImage()"
-    ng-swipe-right="Lightbox.prevImage()">
+<div class="modal-body" ng-class="{'loading':Lightbox.isClickDisabled}" ng-swipe-left="Lightbox.nextImage()" ng-swipe-right="Lightbox.prevImage()">
   <div ng-if="Lightbox.style.headHeight > 0" class="content-head">
     <!-- navigation -->
-    <div class="lightbox-nav">
+    <div class="lightbox-nav" ng-class="{'out': Lightbox.isClickDisabled, 'in': !Lightbox.isClickDisabled }">
       <!-- close button -->
       <button class="close" aria-hidden="true" ng-click="$dismiss()">×</button>
 
       <div class="btn-group" ng-if="Lightbox.images.length > 1">
-        <a class="btn btn-xs btn-default" ng-click="Lightbox.prevImage()">
+        <a class="btn btn-xs btn-default" ng-click="Lightbox.isClickDisabled || Lightbox.prevImage()" ng-disabled="Lightbox.isClickDisabled">
           ‹ Previous
         </a>
 
-        <a ng-href="{{Lightbox.imageUrl}}" target="_blank"
-            class="btn btn-xs btn-default" title="Open in new tab">
+        <a ng-href="{{Lightbox.imageUrl}}" target="_blank" class="btn btn-xs btn-default" title="Open in new tab" ng-disabled="Lightbox.isClickDisabled">
           Open image in new tab
         </a>
 
-        <a class="btn btn-xs btn-default" ng-click="Lightbox.nextImage()">
+        <a class="btn btn-xs btn-default" ng-click="Lightbox.isClickDisabled || Lightbox.nextImage()" ng-disabled="Lightbox.isClickDisabled">
           Next ›
         </a>
       </div>
     </div>
   </div>
 
-  <div class="lightbox-image-container">
-    <!-- caption -->
-    <div class="lightbox-image-caption">
-      <span>{{Lightbox.imageCaption}}</span>
-    </div>
+  <div class="lightbox-image-container scale" ng-swipe-left="Lightbox.isClickDisabled || Lightbox.nextImage($event)" ng-swipe-right="Lightbox.isClickDisabled || Lightbox.prevImage($event)">
 
     <!-- image -->
-    <img ng-if="!Lightbox.isVideo(Lightbox.image)"
-        lightbox-src="{{Lightbox.imageUrl}}">
+    <img ng-if="!Lightbox.isVideo(Lightbox.image) && Lightbox.imageUrl" lightbox-src="{{Lightbox.imageUrl}}" class="image fade">
 
     <!-- video -->
     <div ng-if="Lightbox.isVideo(Lightbox.image)"
@@ -57,7 +49,7 @@
   </div>
 
   <div ng-if="Lightbox.style.footHeight > 0" class="content-foot">
-    <p>content footer here</p>
+    <p class="caption loading" ng-class="{'in':!Lightbox.isClickDisabled}">{{Lightbox.imageCaption}}</p>
   </div>
 
 </div>

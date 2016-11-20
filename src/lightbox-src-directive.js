@@ -117,27 +117,10 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
           Lightbox.fullScreenMode
         );
 
-        // calculate the dimensions of the modal container
-        var modalDimensions = Lightbox.calculateModalDimensions({
-          'windowWidth': windowWidth,
-          'windowHeight': windowHeight,
-          'imageDisplayWidth': imageDisplayDimensions.width,
-          'imageDisplayHeight': imageDisplayDimensions.height
-        });
-
-        // resize the image
-        element.css({
-          'width': imageDisplayDimensions.width + 'px',
-          'height': imageDisplayDimensions.height + 'px'
-        });
-
-        // setting the height on .modal-dialog does not expand the div with the
-        // background, which is .modal-content
         angular.element(
-          document.querySelector('.lightbox-modal .modal-dialog')
+          document.querySelector('.lightbox-modal .modal-content')
         ).css({
-          'width': formatDimension(modalDimensions.width),
-          'margin-top': formatDimension(Lightbox.style.gutter)
+          'border-width': formatDimension(Lightbox.style.border)
         });
 
         // setting the padding on .modal-body
@@ -145,16 +128,6 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
           document.querySelector('.lightbox-modal .modal-body')
         ).css({
           'padding': formatDimension(Lightbox.style.padding)
-        });
-
-        // .modal-content has no width specified; if we set the width on
-        // .modal-content and not on .modal-dialog, .modal-dialog retains its
-        // default width of 600px and that places .modal-content off center
-        angular.element(
-          document.querySelector('.lightbox-modal .modal-content')
-        ).css({
-          'height': formatDimension(modalDimensions.height),
-          'border-width': formatDimension(Lightbox.style.border)
         });
 
         // we set the content head height here because it factors into madal dimensions
@@ -170,6 +143,14 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
         ).css({
           'height': formatDimension(Lightbox.style.footHeight)
         });
+
+        angular.element(
+          document.querySelector('.lightbox-modal .lightbox-image-container')
+        ).css({
+          'width': imageDisplayDimensions.width + 'px',
+          'height': imageDisplayDimensions.height + 'px'
+        });
+
       };
 
       // load the new image and/or resize the video whenever the attr changes
