@@ -29,6 +29,11 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
   this.fullScreenMode = false;
 
   /**
+    sets default styles
+  */
+  this.style = {padding:15, margin:30, border:1, headHeight: 34, footHeight: 0};
+
+  /**
    * @param    {*} image An element in the array of images.
    * @return   {String} The URL of the given image.
    * @type     {Function}
@@ -63,29 +68,17 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateImageDimensionLimits = function (dimensions) {
-    if (dimensions.windowWidth >= 768) {
-      return {
-        // 92px = 2 * (30px margin of .modal-dialog
-        //             + 1px border of .modal-content
-        //             + 15px padding of .modal-body)
-        // with the goal of 30px side margins; however, the actual side margins
-        // will be slightly less (at 22.5px) due to the vertical scrollbar
-        'maxWidth': dimensions.windowWidth - 92,
-        // 126px = 92px as above
-        //         + 34px outer height of .lightbox-nav
-        'maxHeight': dimensions.windowHeight - 126
-      };
+    if (dimensions.windowWidth >= 768 && dimensions.windowHeight >= 640) {
+      this.style.gutter = (this.style.margin); 
+    } else if (dimensions.windowWidth >= 590 && dimensions.windowHeight >= 420) {
+      this.style.gutter = (this.style.margin/2); 
     } else {
-      return {
-        // 52px = 2 * (10px margin of .modal-dialog
-        //             + 1px border of .modal-content
-        //             + 15px padding of .modal-body)
-        'maxWidth': dimensions.windowWidth - 52,
-        // 86px = 52px as above
-        //        + 34px outer height of .lightbox-nav
-        'maxHeight': dimensions.windowHeight - 86
-      };
+      this.style.gutter = 6; 
     }
+    return {
+      'maxWidth': dimensions.windowWidth - (this.style.gutter + this.style.padding + this.style.border)*2,
+      'maxHeight': dimensions.windowHeight - ((this.style.gutter + this.style.padding + this.style.border)*2 + (this.style.headHeight + this.style.footHeight))
+    };
   };
 
   /**
@@ -100,29 +93,8 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateModalDimensions = function (dimensions) {
-    // 400px = arbitrary min width
-    // 32px = 2 * (1px border of .modal-content
-    //             + 15px padding of .modal-body)
-    var width = Math.max(400, dimensions.imageDisplayWidth + 32);
-
-    // 200px = arbitrary min height
-    // 66px = 32px as above
-    //        + 34px outer height of .lightbox-nav
-    var height = Math.max(200, dimensions.imageDisplayHeight + 66);
-
-    // first case:  the modal width cannot be larger than the window width
-    //              20px = arbitrary value larger than the vertical scrollbar
-    //                     width in order to avoid having a horizontal scrollbar
-    // second case: Bootstrap modals are not centered below 768px
-    if (width >= dimensions.windowWidth - 20 || dimensions.windowWidth < 768) {
-      width = 'auto';
-    }
-
-    // the modal height cannot be larger than the window height
-    if (height >= dimensions.windowHeight) {
-      height = 'auto';
-    }
-
+    var width = Math.max(0, dimensions.imageDisplayWidth + (this.style.border+this.style.padding)*2);
+    var height = Math.max(0, dimensions.imageDisplayHeight + (this.style.headHeight + this.style.footHeight) + ((this.style.border+this.style.padding)*2));
     return {
       'width': width,
       'height': height
@@ -188,6 +160,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
     Lightbox.templateUrl = this.templateUrl;
     Lightbox.windowTemplateUrl = this.windowTemplateUrl;
     Lightbox.fullScreenMode = this.fullScreenMode;
+    Lightbox.style = this.style;
     Lightbox.getImageUrl = this.getImageUrl;
     Lightbox.getImageCaption = this.getImageCaption;
     Lightbox.calculateImageDimensionLimits = this.calculateImageDimensionLimits;
@@ -267,6 +240,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       Lightbox.modalInstance = $uibModal.open(angular.extend({
         'templateUrl': Lightbox.templateUrl,
         'windowTemplateUrl': Lightbox.windowTemplateUrl,
+        'animation': true,
         'controller': ['$scope', function ($scope) {
           // $scope is the modal scope, a child of $rootScope
           $scope.Lightbox = Lightbox;

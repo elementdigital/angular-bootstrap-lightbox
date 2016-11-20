@@ -1,7 +1,15 @@
+/*override some bootstrap*/
+.modal-dialog {
+    margin: auto;
+}
+@media (min-width: 768px)
+.modal-dialog {
+    margin: auto;
+}
+
+
 .lightbox-nav {
   position: relative;
-  margin-bottom: 12px; /* the font-size of .btn-xs */
-  height: 22px;
   text-align: center;
   font-size: 0; /* prevent the otherwise inherited font-size and line-height from adding extra space to the bottom of this div */
 }
