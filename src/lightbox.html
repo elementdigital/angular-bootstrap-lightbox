@@ -1,26 +1,24 @@
 <div class="modal-body"
     ng-swipe-left="Lightbox.nextImage()"
     ng-swipe-right="Lightbox.prevImage()">
-  <div ng-if="Lightbox.style.headHeight > 0" class="content-head">
-    <!-- navigation -->
-    <div class="lightbox-nav">
-      <!-- close button -->
-      <button class="close" aria-hidden="true" ng-click="$dismiss()">×</button>
+  <!-- navigation -->
+  <div class="lightbox-nav">
+    <!-- close button -->
+    <button class="close" aria-hidden="true" ng-click="$dismiss()">×</button>
 
-      <div class="btn-group" ng-if="Lightbox.images.length > 1">
-        <a class="btn btn-xs btn-default" ng-click="Lightbox.prevImage()">
-          ‹ Previous
-        </a>
+    <div class="btn-group" ng-if="Lightbox.images.length > 1">
+      <a class="btn btn-xs btn-default" ng-click="Lightbox.prevImage()">
+        ‹ Previous
+      </a>
 
-        <a ng-href="{{Lightbox.imageUrl}}" target="_blank"
-            class="btn btn-xs btn-default" title="Open in new tab">
-          Open image in new tab
-        </a>
+      <a ng-href="{{Lightbox.imageUrl}}" target="_blank"
+          class="btn btn-xs btn-default" title="Open in new tab">
+        Open image in new tab
+      </a>
 
-        <a class="btn btn-xs btn-default" ng-click="Lightbox.nextImage()">
-          Next ›
-        </a>
-      </div>
+      <a class="btn btn-xs btn-default" ng-click="Lightbox.nextImage()">
+        Next ›
+      </a>
     </div>
   </div>
 
@@ -55,9 +53,4 @@
       </embed-video>
     </div>
   </div>
-
-  <div ng-if="Lightbox.style.footHeight > 0" class="content-foot">
-    <p>content footer here</p>
-  </div>
-
 </div>
