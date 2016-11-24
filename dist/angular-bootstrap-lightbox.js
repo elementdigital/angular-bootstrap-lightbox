@@ -644,7 +644,6 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
         angular.element(
           document.querySelector('.lightbox-modal .modal-content')
         ).css({
-          //'height': formatDimension(modalDimensions.height),
           'border-width': formatDimension(Lightbox.style.border)
         });
 

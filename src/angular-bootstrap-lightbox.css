@@ -31,8 +31,9 @@
 .modal {
   /*display:table !important;*/
     display: flex !important;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    /*justify-content: center;*/
 }
 
 .modal-dialog {
