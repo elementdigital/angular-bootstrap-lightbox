@@ -7,6 +7,7 @@
     * [.load](#bootstrapLightbox.ImageLoader.load) ⇒ <code>Promise</code>
   * [.Lightbox](#bootstrapLightbox.Lightbox)
     * [.templateUrl](#bootstrapLightbox.Lightbox.templateUrl) : <code>String</code>
+    * [.windowTemplateUrl](#bootstrapLightbox.Lightbox.windowTemplateUrl) : <code>String</code>
     * [.fullScreenMode](#bootstrapLightbox.Lightbox.fullScreenMode) : <code>Boolean</code>
     * [.getImageUrl](#bootstrapLightbox.Lightbox.getImageUrl) ⇒ <code>String</code>
     * [.getImageCaption](#bootstrapLightbox.Lightbox.getImageCaption) ⇒ <code>String</code>
@@ -57,6 +58,7 @@ Lightbox service.
 
 * [.Lightbox](#bootstrapLightbox.Lightbox)
   * [.templateUrl](#bootstrapLightbox.Lightbox.templateUrl) : <code>String</code>
+  * [.windowTemplateUrl](#bootstrapLightbox.Lightbox.windowTemplateUrl) : <code>String</code>
   * [.fullScreenMode](#bootstrapLightbox.Lightbox.fullScreenMode) : <code>Boolean</code>
   * [.getImageUrl](#bootstrapLightbox.Lightbox.getImageUrl) ⇒ <code>String</code>
   * [.getImageCaption](#bootstrapLightbox.Lightbox.getImageCaption) ⇒ <code>String</code>
@@ -86,6 +88,11 @@ Lightbox service.
 Template URL passed into `$uibModal.open()`.
 
 **Kind**: static property of <code>[Lightbox](#bootstrapLightbox.Lightbox)</code>  
+<a name="bootstrapLightbox.Lightbox.windowTemplateUrl"></a>
+#### Lightbox.windowTemplateUrl : <code>String</code>
+Modal Window Template URL passed into `$uibModal.open()`.
+
+**Kind**: static property of <code>[Lightbox](#bootstrapLightbox.Lightbox)</code>
 <a name="bootstrapLightbox.Lightbox.fullScreenMode"></a>
 #### Lightbox.fullScreenMode : <code>Boolean</code>
 Whether images should be scaled to the maximum possible dimensions.
