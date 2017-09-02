@@ -94,6 +94,9 @@ If you make your own template and save it at `lightbox.html`, no further code is
 angular.module('app').config(function (LightboxProvider) {
   // set a custom template
   LightboxProvider.templateUrl = 'path/to/your-template.html';
+
+  // set a custom modal window template
+  LightboxProvider.templateUrl = 'path/to/your-template.html';
 });
 ```
 
