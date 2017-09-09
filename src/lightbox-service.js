@@ -29,6 +29,14 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
   this.fullScreenMode = false;
 
   /**
+   * Style parameters used in calculating window dimensions.
+   * @type     {array}
+   * @name     style
+   * @memberOf bootstrapLightbox.Lightbox
+   */
+  this.style = {padding:15, margin:30, border:1, headHeight: 34, footHeight: 0};
+
+  /**
    * @param    {*} image An element in the array of images.
    * @return   {String} The URL of the given image.
    * @type     {Function}
@@ -63,29 +71,17 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateImageDimensionLimits = function (dimensions) {
-    if (dimensions.windowWidth >= 768) {
-      return {
-        // 92px = 2 * (30px margin of .modal-dialog
-        //             + 1px border of .modal-content
-        //             + 15px padding of .modal-body)
-        // with the goal of 30px side margins; however, the actual side margins
-        // will be slightly less (at 22.5px) due to the vertical scrollbar
-        'maxWidth': dimensions.windowWidth - 92,
-        // 126px = 92px as above
-        //         + 34px outer height of .lightbox-nav
-        'maxHeight': dimensions.windowHeight - 126
-      };
+    if (dimensions.windowWidth >= 768 && dimensions.windowHeight >= 640) {
+      this.style.gutter = (this.style.margin); 
+    } else if (dimensions.windowWidth >= 590 && dimensions.windowHeight >= 420) {
+      this.style.gutter = (this.style.margin/2); 
     } else {
-      return {
-        // 52px = 2 * (10px margin of .modal-dialog
-        //             + 1px border of .modal-content
-        //             + 15px padding of .modal-body)
-        'maxWidth': dimensions.windowWidth - 52,
-        // 86px = 52px as above
-        //        + 34px outer height of .lightbox-nav
-        'maxHeight': dimensions.windowHeight - 86
-      };
+      this.style.gutter = 12; 
     }
+    return {
+      'maxWidth': dimensions.windowWidth - (this.style.gutter + this.style.padding + this.style.border)*2,
+      'maxHeight': dimensions.windowHeight - ((this.style.gutter + this.style.padding + this.style.border)*2 + (this.style.headHeight + this.style.footHeight))
+    };
   };
 
   /**
@@ -100,29 +96,8 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
    * @memberOf bootstrapLightbox.Lightbox
    */
   this.calculateModalDimensions = function (dimensions) {
-    // 400px = arbitrary min width
-    // 32px = 2 * (1px border of .modal-content
-    //             + 15px padding of .modal-body)
-    var width = Math.max(400, dimensions.imageDisplayWidth + 32);
-
-    // 200px = arbitrary min height
-    // 66px = 32px as above
-    //        + 34px outer height of .lightbox-nav
-    var height = Math.max(200, dimensions.imageDisplayHeight + 66);
-
-    // first case:  the modal width cannot be larger than the window width
-    //              20px = arbitrary value larger than the vertical scrollbar
-    //                     width in order to avoid having a horizontal scrollbar
-    // second case: Bootstrap modals are not centered below 768px
-    if (width >= dimensions.windowWidth - 20 || dimensions.windowWidth < 768) {
-      width = 'auto';
-    }
-
-    // the modal height cannot be larger than the window height
-    if (height >= dimensions.windowHeight) {
-      height = 'auto';
-    }
-
+    var width = Math.max(100, dimensions.imageDisplayWidth + (this.style.border+this.style.padding)*2);
+    var height = Math.max(100, dimensions.imageDisplayHeight + (this.style.headHeight + this.style.footHeight) + ((this.style.border+this.style.padding)*2));
     return {
       'width': width,
       'height': height
@@ -158,8 +133,8 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
       !this.getImageUrl(image).match(/\.(mp4|ogg|webm)$/);
   };
 
-  this.$get = ['$document', '$injector', '$uibModal', '$timeout', 'ImageLoader',
-      function ($document, $injector, $uibModal, $timeout, ImageLoader) {
+  this.$get = ['$document', '$injector', '$uibModal', '$timeout', 'ImageLoader', '$animate',
+      function ($document, $injector, $uibModal, $timeout, ImageLoader, $animate) {
     // optional dependency
     var cfpLoadingBar = $injector.has('cfpLoadingBar') ?
       $injector.get('cfpLoadingBar'): null;
@@ -167,12 +142,28 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
     var Lightbox = {};
 
     /**
-     * Array of all images to be shown in the lightbox (not `Image` objects).
+     * Array of images to be shown in the lightbox (not `Image` objects).
      * @type     {Array}
      * @name     images
      * @memberOf bootstrapLightbox.Lightbox
      */
     Lightbox.images = [];
+    
+     /**
+     * Array of filtered images to be shown in the lightbox (not `Image` objects).
+     * @type     {Array}
+     * @name     images
+     * @memberOf bootstrapLightbox.Lightbox
+     */
+    Lightbox.imagesfiltered = [];
+    
+     /**
+     * Array of all images to be shown in the lightbox (not `Image` objects).
+     * @type     {Array}
+     * @name     images
+     * @memberOf bootstrapLightbox.Lightbox
+     */
+    Lightbox.imagesAll = [];
 
     /**
      * The index in the `Lightbox.images` aray of the image that is currently
@@ -183,11 +174,21 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      */
     Lightbox.index = -1;
 
+    /**
+     * The index in the `Lightbox.images` aray of the image that is currently
+     *   shown in the lightbox.
+     * @type     {Number}
+     * @name     index
+     * @memberOf bootstrapLightbox.Lightbox
+     */
+     Lightbox.allIndex = -1;
+
     // set the configurable properties and methods, the defaults of which are
     // defined above
     Lightbox.templateUrl = this.templateUrl;
     Lightbox.windowTemplateUrl = this.windowTemplateUrl;
     Lightbox.fullScreenMode = this.fullScreenMode;
+    Lightbox.style = this.style;
     Lightbox.getImageUrl = this.getImageUrl;
     Lightbox.getImageCaption = this.getImageCaption;
     Lightbox.calculateImageDimensionLimits = this.calculateImageDimensionLimits;
@@ -259,14 +260,17 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @name     openModal
      * @memberOf bootstrapLightbox.Lightbox
      */
-    Lightbox.openModal = function (newImages, newIndex, modalParams) {
+    Lightbox.openModal = function (newImages, newAllImages, newAllIndex, newIndex, styleParams, modalParams) {
       Lightbox.images = newImages;
-      Lightbox.setImage(newIndex);
+      Lightbox.imagesAll = newAllImages;
+      Lightbox.allIndex = newAllIndex;
+      Lightbox.setImage(newIndex, newAllIndex);
 
       // store the modal instance so we can close it manually if we need to
       Lightbox.modalInstance = $uibModal.open(angular.extend({
         'templateUrl': Lightbox.templateUrl,
         'windowTemplateUrl': Lightbox.windowTemplateUrl,
+        'animation': false,
         'controller': ['$scope', function ($scope) {
           // $scope is the modal scope, a child of $rootScope
           $scope.Lightbox = Lightbox;
@@ -281,7 +285,9 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
         // prevent the lightbox from flickering from the old image when it gets
         // opened again
         Lightbox.images = [];
+        Lightbox.imagesAll = [];
         Lightbox.index = 1;
+        Lightbox.allIndex = 1;
         Lightbox.image = {};
         Lightbox.imageUrl = null;
         Lightbox.imageCaption = null;
@@ -318,14 +324,15 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @name     setImage
      * @memberOf bootstrapLightbox.Lightbox
      */
-    Lightbox.setImage = function (newIndex) {
+    Lightbox.setImage = function (newIndex, newAllIndex) {
       if (!(newIndex in Lightbox.images)) {
         throw 'Invalid image.';
       }
 
       // update the loading flag and start the loading bar
-      Lightbox.loading = true;
+      Lightbox.isClickDisabled = true;
       if (cfpLoadingBar) {
+        Lightbox.loading = true;
         cfpLoadingBar.start();
       }
 
@@ -338,14 +345,24 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
         Lightbox.index = properties.index || newIndex;
         Lightbox.image = properties.image || image;
         Lightbox.imageUrl = properties.imageUrl || imageUrl;
-        Lightbox.imageCaption = properties.imageCaption ||
-          Lightbox.getImageCaption(image);
+        Lightbox.imageCaption = properties.imageCaption || Lightbox.getImageCaption(image);
+        Lightbox.allIndex = properties.allIndex || newAllIndex;
+        Lightbox.imagesTotal = properties.imagesTotal || Lightbox.imagesAll.length;
+        Lightbox.pagesTotal = properties.pagesTotal || Lightbox.pagesTotal;
+        Lightbox.currentPage = properties.currentPage || Lightbox.currentPage;
 
-        // restore the loading flag and complete the loading bar
-        Lightbox.loading = false;
-        if (cfpLoadingBar) {
-          cfpLoadingBar.complete();
-        }
+        var el = angular.element(document.querySelector('.lightbox-image-container'));
+        var im = angular.element(document.querySelector('.lightbox-image-container .image'));
+        $animate.addClass(el,'scale').then(function(){
+            // restore the loading flag and complete the loading bar
+            Lightbox.isClickDisabled = false;
+            im.addClass('fade');
+            if (cfpLoadingBar) {
+              Lightbox.loading = false;
+              cfpLoadingBar.complete();
+            }
+          }
+        );
       };
 
       if (!Lightbox.isVideo(image)) {
@@ -373,7 +390,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @memberOf bootstrapLightbox.Lightbox
      */
     Lightbox.firstImage = function () {
-      Lightbox.setImage(0);
+      Lightbox.setImage(0, 0);
     };
 
     /**
@@ -383,8 +400,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @memberOf bootstrapLightbox.Lightbox
      */
     Lightbox.prevImage = function () {
-      Lightbox.setImage((Lightbox.index - 1 + Lightbox.images.length) %
-        Lightbox.images.length);
+      Lightbox.setImage((Lightbox.index - 1 + Lightbox.images.length) % Lightbox.images.length, Lightbox.allIndex - 1);
     };
 
     /**
@@ -394,7 +410,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @memberOf bootstrapLightbox.Lightbox
      */
     Lightbox.nextImage = function () {
-      Lightbox.setImage((Lightbox.index + 1) % Lightbox.images.length);
+      Lightbox.setImage((Lightbox.index + 1) % Lightbox.images.length, Lightbox.allIndex + 1);
     };
 
     /**
@@ -404,7 +420,7 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @memberOf bootstrapLightbox.Lightbox
      */
     Lightbox.lastImage = function () {
-      Lightbox.setImage(Lightbox.images.length - 1);
+      Lightbox.setImage(Lightbox.images.length - 1, Lightbox.imagesTotal - 1);
     };
 
     /**
@@ -417,9 +433,13 @@ angular.module('bootstrapLightbox').provider('Lightbox', function () {
      * @name     setImages
      * @memberOf bootstrapLightbox.Lightbox
      */
-    Lightbox.setImages = function (newImages) {
+    Lightbox.setImages = function (newImages, newIndex, imagesFilteredAll, newAllIndex, callback) {
       Lightbox.images = newImages;
-      Lightbox.setImage(Lightbox.index);
+      Lightbox.imagesAll = imagesFilteredAll;
+      Lightbox.allIndex = newAllIndex;
+      Lightbox.setImage(newIndex, newAllIndex);
+
+      return callback(newIndex, newAllIndex);
     };
 
     // Bind the left and right arrow keys for image navigation. This event

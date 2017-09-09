@@ -117,36 +117,40 @@ angular.module('bootstrapLightbox').directive('lightboxSrc', ['$window',
           Lightbox.fullScreenMode
         );
 
-        // calculate the dimensions of the modal container
-        var modalDimensions = Lightbox.calculateModalDimensions({
-          'windowWidth': windowWidth,
-          'windowHeight': windowHeight,
-          'imageDisplayWidth': imageDisplayDimensions.width,
-          'imageDisplayHeight': imageDisplayDimensions.height
+        angular.element(
+          document.querySelector('.lightbox-modal .modal-content')
+        ).css({
+          'border-width': formatDimension(Lightbox.style.border)
         });
 
-        // resize the image
-        element.css({
+        // setting the padding on .modal-body
+        angular.element(
+          document.querySelector('.lightbox-modal .modal-body')
+        ).css({
+          'padding': formatDimension(Lightbox.style.padding)
+        });
+
+        // we set the content head height here because it factors into madal dimensions
+        angular.element(
+          document.querySelector('.modal-content .content-head')
+        ).css({
+          'height': formatDimension(Lightbox.style.headHeight)
+        });
+
+        // we ste the content foot here because it factors into madal dimensions
+        angular.element(
+          document.querySelector('.modal-content .content-foot')
+        ).css({
+          'height': formatDimension(Lightbox.style.footHeight)
+        });
+
+        angular.element(
+          document.querySelector('.lightbox-modal .lightbox-image-container')
+        ).css({
           'width': imageDisplayDimensions.width + 'px',
           'height': imageDisplayDimensions.height + 'px'
         });
 
-        // setting the height on .modal-dialog does not expand the div with the
-        // background, which is .modal-content
-        angular.element(
-          document.querySelector('.lightbox-modal .modal-dialog')
-        ).css({
-          'width': formatDimension(modalDimensions.width)
-        });
-
-        // .modal-content has no width specified; if we set the width on
-        // .modal-content and not on .modal-dialog, .modal-dialog retains its
-        // default width of 600px and that places .modal-content off center
-        angular.element(
-          document.querySelector('.lightbox-modal .modal-content')
-        ).css({
-          'height': formatDimension(modalDimensions.height)
-        });
       };
 
       // load the new image and/or resize the video whenever the attr changes

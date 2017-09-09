@@ -22,9 +22,11 @@ angular.module('bootstrapLightbox').service('ImageLoader', ['$q',
     // when the image has loaded
     image.onload = function () {
       // check image properties for possible errors
-      if ((typeof this.complete === 'boolean' && this.complete === false) ||
-          (typeof this.naturalWidth === 'number' && this.naturalWidth === 0)) {
+      if ((typeof this.complete === 'boolean' && this.complete === false) || (typeof this.naturalWidth === 'number' && this.naturalWidth === 0)) {
         deferred.reject();
+      }else{
+        var el = angular.element(document.querySelector('.lightbox-image-container .image'));
+        el.addClass('in');
       }
 
       deferred.resolve(image);
